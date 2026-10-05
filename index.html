@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#15110d">
+  <title>ASHÔW • Gestão do Bar</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <img src="assets/ashow-logo.jpg" alt="Logo ASHÔW">
+        <div>
+          <strong>ASHÔW</strong>
+          <span>Gestão do Bar</span>
+        </div>
+      </div>
+
+      <nav class="nav">
+        <button class="nav-item active" data-page="dashboard"><span>⌂</span> Dashboard</button>
+        <button class="nav-item" data-page="products"><span>▦</span> Produtos & Estoque</button>
+        <button class="nav-item" data-page="sales"><span>＋</span> Registrar Venda</button>
+        <button class="nav-item" data-page="history"><span>↻</span> Histórico de Vendas</button>
+        <button class="nav-item" data-page="expenses"><span>−</span> Gastos</button>
+        <button class="nav-item" data-page="reports"><span>▥</span> Relatórios</button>
+      </nav>
+
+      <div class="sidebar-bottom">
+        <button class="nav-item" id="backupBtn"><span>⇩</span> Backup dos dados</button>
+        <label class="nav-item file-btn"><span>⇧</span> Restaurar backup
+          <input type="file" id="restoreInput" accept=".json" hidden>
+        </label>
+        <button class="nav-item danger-text" id="resetBtn"><span>⌫</span> Limpar dados</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <button class="icon-btn menu-btn" id="menuBtn" aria-label="Abrir menu">☰</button>
+        <div>
+          <p class="eyebrow">ADMINISTRAÇÃO</p>
+          <h1 id="pageTitle">Dashboard</h1>
+        </div>
+        <div class="top-actions">
+          <span class="save-status" id="saveStatus">● Dados salvos</span>
+          <button class="primary-btn" id="quickSaleBtn">＋ Nova venda</button>
+        </div>
+      </header>
+
+      <section class="content">
+        <!-- DASHBOARD -->
+        <div class="page active" id="page-dashboard">
+          <div class="hero-card">
+            <div>
+              <p class="eyebrow light">ASHÔW • CONTROLE FINANCEIRO</p>
+              <h2>Seu bar, seus números.</h2>
+              <p>Controle estoque, vendas, gastos e margem de lucro em um só lugar.</p>
+            </div>
+            <img src="assets/ashow-logo.jpg" alt="ASHÔW">
+          </div>
+
+          <div class="stats-grid">
+            <article class="stat-card">
+              <div class="stat-icon green">R$</div>
+              <div><span>Faturamento</span><strong id="dashRevenue">R$ 0,00</strong><small id="dashRevenueSub">no período</small></div>
+            </article>
+            <article class="stat-card">
+              <div class="stat-icon gold">↗</div>
+              <div><span>Lucro estimado</span><strong id="dashProfit">R$ 0,00</strong><small id="dashMargin">Margem: 0%</small></div>
+            </article>
+            <article class="stat-card">
+              <div class="stat-icon red">−</div>
+              <div><span>Gastos</span><strong id="dashExpenses">R$ 0,00</strong><small>despesas registradas</small></div>
+            </article>
+            <article class="stat-card">
+              <div class="stat-icon brown">▦</div>
+              <div><span>Produtos</span><strong id="dashProducts">0</strong><small id="dashLowStock">0 em estoque baixo</small></div>
+            </article>
+          </div>
+
+          <div class="dashboard-grid">
+            <section class="panel">
+              <div class="panel-head">
+                <div><h3>Resumo do período</h3><p>Últimos 30 dias</p></div>
+                <button class="text-btn" data-go="reports">Ver relatório →</button>
+              </div>
+              <div class="mini-bars" id="revenueChart"></div>
+            </section>
+            <section class="panel">
+              <div class="panel-head"><div><h3>Estoque baixo</h3><p>Reponha antes de faltar</p></div></div>
+              <div id="lowStockList" class="compact-list"></div>
+            </section>
+          </div>
+
+          <section class="panel">
+            <div class="panel-head"><div><h3>Últimas vendas</h3><p>Movimentações mais recentes</p></div><button class="text-btn" data-go="history">Ver todas →</button></div>
+            <div id="recentSales"></div>
+          </section>
+        </div>
+
+        <!-- PRODUCTS -->
+        <div class="page" id="page-products">
+          <div class="section-head">
+            <div><p class="eyebrow">ESTOQUE</p><h2>Produtos & Estoque</h2><p>Cadastre seus produtos, custos, preços e quantidades.</p></div>
+            <button class="primary-btn" id="addProductBtn">＋ Novo produto</button>
+          </div>
+          <div class="toolbar">
+            <div class="search"><span>⌕</span><input id="productSearch" placeholder="Pesquisar produto..."></div>
+            <select id="stockFilter"><option value="all">Todos os estoques</option><option value="low">Estoque baixo</option><option value="zero">Sem estoque</option></select>
+          </div>
+          <div class="table-wrap">
+            <table><thead><tr><th>Produto</th><th>Categoria</th><th>Custo</th><th>Venda</th><th>Lucro/un.</th><th>Margem</th><th>Estoque</th><th>Ações</th></tr></thead>
+            <tbody id="productsTable"></tbody></table>
+          </div>
+        </div>
+
+        <!-- SALES -->
+        <div class="page" id="page-sales">
+          <div class="section-head">
+            <div><p class="eyebrow">CAIXA</p><h2>Registrar venda</h2><p>Monte a venda e salve. O estoque será atualizado automaticamente.</p></div>
+          </div>
+          <div class="sale-layout">
+            <section class="panel">
+              <div class="panel-head"><div><h3>Adicionar itens</h3><p>Selecione o produto e a quantidade.</p></div></div>
+              <div class="sale-add">
+                <select id="saleProduct"></select>
+                <input type="number" id="saleQty" min="1" value="1" placeholder="Qtd.">
+                <button class="primary-btn" id="addToCartBtn">Adicionar</button>
+              </div>
+              <div id="cartList" class="cart-list"></div>
+            </section>
+            <aside class="panel sale-summary">
+              <h3>Resumo da venda</h3>
+              <div class="summary-row"><span>Itens</span><strong id="cartItems">0</strong></div>
+              <div class="summary-row"><span>Custo</span><strong id="cartCost">R$ 0,00</strong></div>
+              <div class="summary-row total"><span>Total</span><strong id="cartTotal">R$ 0,00</strong></div>
+              <div class="summary-row profit"><span>Lucro estimado</span><strong id="cartProfit">R$ 0,00</strong></div>
+              <label class="field"><span>Forma de pagamento</span><select id="paymentMethod"><option>Dinheiro</option><option>Pix</option><option>Débito</option><option>Crédito</option><option>Outro</option></select></label>
+              <label class="field"><span>Observação</span><input id="saleNote" placeholder="Opcional"></label>
+              <button class="primary-btn wide" id="saveSaleBtn">✓ Finalizar e salvar venda</button>
+              <button class="ghost-btn wide" id="clearCartBtn">Limpar venda</button>
+            </aside>
+          </div>
+        </div>
+
+        <!-- HISTORY -->
+        <div class="page" id="page-history">
+          <div class="section-head"><div><p class="eyebrow">MOVIMENTAÇÕES</p><h2>Histórico de vendas</h2><p>Você pode editar ou excluir vendas erradas.</p></div></div>
+          <div class="toolbar">
+            <div class="search"><span>⌕</span><input id="saleSearch" placeholder="Pesquisar por data, pagamento ou observação..."></div>
+            <input type="date" id="saleDateFilter">
+          </div>
+          <div class="table-wrap"><table><thead><tr><th>Data</th><th>Itens</th><th>Pagamento</th><th>Total</th><th>Custo</th><th>Lucro</th><th>Ações</th></tr></thead><tbody id="salesTable"></tbody></table></div>
+        </div>
+
+        <!-- EXPENSES -->
+        <div class="page" id="page-expenses">
+          <div class="section-head"><div><p class="eyebrow">SAÍDAS</p><h2>Gastos do bar</h2><p>Registre compras e despesas para saber quanto realmente está sobrando.</p></div><button class="primary-btn" id="addExpenseBtn">＋ Registrar gasto</button></div>
+          <div class="stats-grid compact">
+            <article class="stat-card"><div class="stat-icon red">−</div><div><span>Total de gastos</span><strong id="expenseTotal">R$ 0,00</strong><small>registrados</small></div></article>
+          </div>
+          <div class="table-wrap"><table><thead><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Valor</th><th>Ações</th></tr></thead><tbody id="expensesTable"></tbody></table></div>
+        </div>
+
+        <!-- REPORTS -->
+        <div class="page" id="page-reports">
+          <div class="section-head"><div><p class="eyebrow">ANÁLISE</p><h2>Relatórios</h2><p>Veja faturamento, custos, gastos e lucro estimado.</p></div></div>
+          <div class="report-filter">
+            <label>Período <select id="reportPeriod"><option value="30">Últimos 30 dias</option><option value="7">Últimos 7 dias</option><option value="90">Últimos 90 dias</option><option value="all">Todo o período</option></select></label>
+          </div>
+          <div class="stats-grid">
+            <article class="stat-card"><div class="stat-icon green">R$</div><div><span>Vendas</span><strong id="reportRevenue">R$ 0,00</strong><small id="reportSalesCount">0 vendas</small></div></article>
+            <article class="stat-card"><div class="stat-icon gold">↗</div><div><span>Lucro bruto</span><strong id="reportGrossProfit">R$ 0,00</strong><small id="reportMargin">Margem: 0%</small></div></article>
+            <article class="stat-card"><div class="stat-icon red">−</div><div><span>Gastos</span><strong id="reportExpenses">R$ 0,00</strong><small>despesas</small></div></article>
+            <article class="stat-card"><div class="stat-icon brown">=</div><div><span>Resultado</span><strong id="reportNet">R$ 0,00</strong><small>após gastos</small></div></article>
+          </div>
+          <div class="dashboard-grid">
+            <section class="panel"><div class="panel-head"><div><h3>Produtos mais vendidos</h3><p>Quantidade vendida no período</p></div></div><div id="topProducts"></div></section>
+            <section class="panel"><div class="panel-head"><div><h3>Formas de pagamento</h3><p>Distribuição das vendas</p></div></div><div id="paymentReport"></div></section>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- PRODUCT MODAL -->
+  <div class="modal-backdrop" id="productModal">
+    <div class="modal">
+      <div class="modal-head"><div><p class="eyebrow">CADASTRO</p><h3 id="productModalTitle">Novo produto</h3></div><button class="close-btn" data-close="productModal">×</button></div>
+      <form id="productForm">
+        <input type="hidden" id="productId">
+        <div class="form-grid">
+          <label class="field full"><span>Nome do produto *</span><input id="productName" required placeholder="Ex.: Cerveja Heineken 600ml"></label>
+          <label class="field"><span>Categoria</span><input id="productCategory" placeholder="Ex.: Bebidas"></label>
+          <label class="field"><span>Estoque atual *</span><input id="productStock" type="number" min="0" step="1" required value="0"></label>
+          <label class="field"><span>Custo por unidade *</span><input id="productCost" type="number" min="0" step="0.01" required placeholder="0,00"></label>
+          <label class="field"><span>Preço de venda *</span><input id="productPrice" type="number" min="0" step="0.01" required placeholder="0,00"></label>
+        </div>
+        <div class="profit-preview" id="profitPreview">Margem: 0% • Lucro por unidade: R$ 0,00</div>
+        <div class="modal-actions"><button type="button" class="ghost-btn" data-close="productModal">Cancelar</button><button class="primary-btn" type="submit">Salvar produto</button></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- EXPENSE MODAL -->
+  <div class="modal-backdrop" id="expenseModal">
+    <div class="modal">
+      <div class="modal-head"><div><p class="eyebrow">SAÍDA</p><h3 id="expenseModalTitle">Registrar gasto</h3></div><button class="close-btn" data-close="expenseModal">×</button></div>
+      <form id="expenseForm">
+        <input type="hidden" id="expenseId">
+        <div class="form-grid">
+          <label class="field full"><span>Descrição *</span><input id="expenseDescription" required placeholder="Ex.: Compra de bebidas"></label>
+          <label class="field"><span>Categoria</span><input id="expenseCategory" placeholder="Ex.: Estoque"></label>
+          <label class="field"><span>Valor *</span><input id="expenseValue" type="number" min="0" step="0.01" required placeholder="0,00"></label>
+          <label class="field full"><span>Data *</span><input id="expenseDate" type="date" required></label>
+        </div>
+        <div class="modal-actions"><button type="button" class="ghost-btn" data-close="expenseModal">Cancelar</button><button class="primary-btn" type="submit">Salvar gasto</button></div>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+  <script src="app.js"></script>
+</body>
+</html>
